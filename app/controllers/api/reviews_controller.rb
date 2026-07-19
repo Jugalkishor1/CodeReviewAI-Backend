@@ -20,8 +20,13 @@ module Api
         .where(repositories: { user_id: current_user.id })
         .find(params[:id])
 
-      review = GenerateReviewJob.perform_now(current_user.id, pull_request.id)
+      review = ReviewGenerationService.new(current_user, pull_request).call
       render json: ReviewSerializer.new(review).as_json, status: :created
+    end
+
+    def destroy
+      scoped_reviews.find(params[:id]).destroy!
+      head :no_content
     end
 
     private

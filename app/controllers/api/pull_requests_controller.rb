@@ -2,7 +2,7 @@ module Api
   class PullRequestsController < ApplicationController
     def index
       repository = current_user.repositories.find(params[:id])
-      pull_requests = SyncPullRequestsJob.perform_now(current_user.id, repository.id)
+      pull_requests = PullRequestSyncService.new(current_user, repository).call
       render json: pull_requests.map { |pull_request| PullRequestSerializer.new(pull_request).as_json }
     end
 

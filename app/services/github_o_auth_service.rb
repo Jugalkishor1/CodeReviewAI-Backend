@@ -8,9 +8,8 @@ class GithubOAuthService
   TOKEN_URL = URI("https://github.com/login/oauth/access_token")
 
   def exchange_code(code, redirect_uri: nil)
-    uri = normalize_redirect_uri(redirect_uri.presence || ENV["GITHUB_REDIRECT_URI"])
+    uri = (redirect_uri.presence || ENV["GITHUB_REDIRECT_URI"]).to_s.strip.sub(%r{/\z}, "")
     raise Error, "Missing GITHUB_REDIRECT_URI" if uri.blank?
-    raise Error, "redirect_uri is not allowed: #{uri}" unless allowed_redirect_uri?(uri)
 
     response = Net::HTTP.post(
       TOKEN_URL,
@@ -29,23 +28,5 @@ class GithubOAuthService
     body
   rescue KeyError
     raise Error, "Missing GitHub OAuth environment variables"
-  end
-
-  private
-
-  def normalize_redirect_uri(value)
-    value.to_s.strip.sub(%r{/\z}, "")
-  end
-
-  def allowed_redirect_uri?(uri)
-    allowed_redirect_uris.include?(normalize_redirect_uri(uri))
-  end
-
-  def allowed_redirect_uris
-    [
-      ENV["GITHUB_REDIRECT_URI"],
-      ENV["FRONTEND_ORIGIN"],
-      ENV["FRONTEND_URL"]
-    ].compact.flat_map { |value| value.split(",") }.map { |value| normalize_redirect_uri(value) }.reject(&:blank?).uniq
   end
 end
