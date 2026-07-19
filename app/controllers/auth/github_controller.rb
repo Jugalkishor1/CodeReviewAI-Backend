@@ -4,7 +4,8 @@ module Auth
 
     def create
       code = params.require(:code)
-      oauth = GithubOAuthService.new.exchange_code(code)
+      redirect_uri = params[:redirect_uri].presence
+      oauth = GithubOAuthService.new.exchange_code(code, redirect_uri: redirect_uri)
       profile = GithubClient.new(oauth.fetch("access_token")).current_user
       session_token = SecureRandom.urlsafe_base64(48)
 
