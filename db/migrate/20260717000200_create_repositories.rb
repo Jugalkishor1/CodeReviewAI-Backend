@@ -13,7 +13,7 @@ class CreateRepositories < ActiveRecord::Migration[8.1]
       t.timestamps
     end
 
-    add_index :repositories, [:user_id, :github_id], unique: true
-    add_index :repositories, [:user_id, :full_name]
+    add_index :repositories, [ :user_id, :github_id ], unique: true
+    add_index :repositories, [ :user_id, :full_name ]
   end
 end
